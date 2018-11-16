@@ -12,6 +12,9 @@ from django.utils.decorators import method_decorator
 from django.urls import reverse_lazy
 from django.shortcuts import redirect
 
+from django_filters.views import FilterView
+from .filters import HeritageSiteFilter
+
 def index(request):
 	return HttpResponse("Hello, world. You're at the UNESCO Heritage Sites index page.")
 
@@ -30,32 +33,32 @@ class SiteListView(generic.ListView):
 	template_name = 'heritagesites/site.html'
 	paginate_by = 50
 
-	def get_queryset(self):
-		return HeritageSite.objects.all()# TODO write ORM code to retrieve all Heritage Sites
+	#def get_queryset(self):
+		#return HeritageSite.objects.all()# TODO write ORM code to retrieve all Heritage Sites
 
 class SiteDetailView(generic.DetailView):
 	model = HeritageSite
 	context_object_name = 'site'
 	template_name = 'heritagesites/site_detail.html'# TODO add the correct template string value
 
-@method_decorator(login_required, name='dispatch')	
+@method_decorator(login_required, name='dispatch')
 class CountryAreaListView(generic.ListView):
 	model = CountryArea
 	context_object_name = 'countries'
 	template_name = 'heritagesites/country_area.html'
 	paginate_by = 20
-	
+
 	def dispatch(self, *args, **kwargs):
-		return super().dispatch(*args, **kwargs)	
+		return super().dispatch(*args, **kwargs)
 
 	def get_queryset(self):
 		return CountryArea.objects.all().select_related('location','dev_status').order_by('country_area_name')
 
 @method_decorator(login_required, name='dispatch')
 class CountryAreaDetailView(generic.DetailView):
-	model = CountryArea	
+	model = CountryArea
 	context_object_name = 'country'
-	template_name = 'heritagesites/country_area_detail.html'	
+	template_name = 'heritagesites/country_area_detail.html'
 
 	def dispatch(self, *args, **kwargs):
 		return super().dispatch(*args, **kwargs)
@@ -162,6 +165,8 @@ class SiteDeleteView(generic.DeleteView):
 
 		self.object.delete()
 
-		return HttpResponseRedirect(self.get_success_url())	
-	
-		
+		return HttpResponseRedirect(self.get_success_url())
+
+class SiteFilterView(FilterView):
+	filterset_class = HeritageSiteFilter
+	template_name = 'heritagesites/site_filter.html'

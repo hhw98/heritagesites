@@ -8,6 +8,7 @@
 
 from django.db import models
 from django.urls import reverse
+from django.db.models import F
 
 
 class CountryArea(models.Model):
@@ -29,7 +30,7 @@ class CountryArea(models.Model):
         return self.country_area_name
 
 
-'''   
+'''
 class CountryArea(models.Model):
     country_area_id = models.AutoField(primary_key=True)
     country_area_name = models.CharField(unique=True, max_length=100)
@@ -105,7 +106,112 @@ class HeritageSite(models.Model):
     country_area_display.short_description = 'Country or Area'
     def get_absolute_url(self):
         #return reverse('sites', kwargs={'pk': self.pk})
-        return reverse('site_detail', args=[str(self.pk)])		
+        return reverse('site_detail', args=[str(self.pk)])
+    @property
+    def country_area_names(self):
+        """
+		Returns a list of UNSD countries/areas (names only) associated with a Heritage Site.
+		Note that not all Heritage Sites are associated with a country/area (e.g., Old City
+		Walls of Jerusalem). In such cases the Queryset will return as <QuerySet [None]> and the
+		list will need to be checked for None or a TypeError (sequence item 0: expected str
+		instance, NoneType found) runtime error will be thrown.
+		:return: string
+		"""
+        countries = self.country_area.select_related('location').order_by('country_area_name')
+
+        names = []
+        for country in countries:
+            name = country.country_area_name
+            if name is None:
+                continue
+            iso_code = country.iso_alpha3_code
+
+            name_and_code = ''.join([name, ' (', iso_code, ')'])
+            if name_and_code not in names:
+                names.append(name_and_code)
+
+        return ', '.join(names)
+    @property
+    def region_names(self):
+        """
+        Returns a list of UNSD regions (names only) associated with a Heritage Site.
+        Note that not all Heritage Sites are associated with a region. In such cases the
+        Queryset will return as <QuerySet [None]> and the list will need to be checked for
+        None or a TypeError (sequence item 0: expected str instance, NoneType found) runtime
+        error will be thrown.
+        :return: string
+        """
+
+		# Add code that uses self to retrieve a QuerySet composed of regions, then loops over it
+		# building a list of region names, before returning a comma-delimited string of names.
+        region_obj = HeritageSite.objects.select_related().values(name = F('country_area__location__region__region_name')).order_by('name').filter(heritage_site_id = self.heritage_site_id)
+        names = []
+        for i in range(len(region_obj)):
+            r = region_obj[i]
+            region = r.get('name')
+            if region is None:
+                continue
+            if region not in names:
+                names.append(region)
+        #print(names)
+        return ', '.join(names)
+
+
+    @property
+    def sub_region_names(self):
+        """
+        Returns a list of UNSD subregions (names only) associated with a Heritage Site.
+        Note that not all Heritage Sites are associated with a subregion. In such cases the
+        Queryset will return as <QuerySet [None]> and the list will need to be checked for
+        None or a TypeError (sequence item 0: expected str instance, NoneType found) runtime
+        error will be thrown.
+        :return: string
+        """
+
+		# Add code that uses self to retrieve a QuerySet, then loops over it building a list of
+		# sub region names, before returning a comma-delimited string of names using the string
+		# join method.
+        sub_region_obj = HeritageSite.objects.select_related().values(name = F('country_area__location__sub_region__sub_region_name')).order_by('name').filter(heritage_site_id = self.heritage_site_id)
+
+        names = []
+        for i in range(len(sub_region_obj)):
+            r = sub_region_obj[i]
+            sub_region = r.get('name')
+            if sub_region is None:
+                continue
+            if sub_region not in names:
+                names.append(sub_region)
+        #print(names)
+        return ', '.join(names)
+    @property
+    def intermediate_region_names(self):
+        """
+        Returns a list of UNSD intermediate regions (names only) associated with a Heritage Site.
+        Note that not all Heritage Sites are associated with an intermediate region. In such
+        cases the Queryset will return as <QuerySet [None]> and the list will need to be
+        checked for None or a TypeError (sequence item 0: expected str instance, NoneType found)
+        runtime error will be thrown.
+        :return: string
+        """
+
+		# Add code that uses self to retrieve a QuerySet, then loops over it building a list of
+		# intermediate region names, before returning a comma-delimited string of names using the
+		# string join method.
+        intermediate_region_obj = HeritageSite.objects.select_related().values(name = F('country_area__location__intermediate_region__intermediate_region_name')).order_by('name').filter(heritage_site_id = self.heritage_site_id)
+
+
+        names = []
+        for i in range(len(intermediate_region_obj)):
+            r = intermediate_region_obj[i]
+            intermediate_region = r.get('name')
+            if intermediate_region is None:
+                continue
+            if intermediate_region not in names:
+                names.append(intermediate_region)
+        #print(names)
+        return ', '.join(names)
+
+
 '''
 class HeritageSite(models.Model):
     heritage_site_id = models.AutoField(primary_key=True)
@@ -269,7 +375,7 @@ class Planet(models.Model):
         verbose_name = 'UNESCO Planet'
         verbose_name_plural = 'UNESCO Planets'
     def __str__(self):
-        return "planet_name: "+self.planet_name+" unsd_name "+self.unsd_name		
+        return "planet_name: "+self.planet_name+" unsd_name "+self.unsd_name
 
 class Location(models.Model):
     location_id = models.AutoField(primary_key=True)
@@ -285,9 +391,9 @@ class Location(models.Model):
         ordering = []
         verbose_name = 'UNESCO Location'
         verbose_name_plural = 'UNESCO Locations'
-    def __str__(self):        
-        return '{}  {}  {}  {}'.format(            
-		   self.w,            
-		   self.x if self.x else '',            
-		   self.y if self.y else '',            
+    def __str__(self):
+        return '{}  {}  {}  {}'.format(
+		   self.w,
+		   self.x if self.x else '',
+		   self.y if self.y else '',
 		   self.z if self.z else '')

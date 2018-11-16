@@ -46,7 +46,8 @@ INSTALLED_APPS = [
     'heritagesites.apps.HeritagesitesConfig',
 	'social_django', 
 	'test_without_migrations',
-	'crispy_forms'
+	'crispy_forms',
+	'django_filters'
 ]
 # django-crispy-forms
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
