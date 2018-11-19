@@ -144,15 +144,24 @@ class HeritageSite(models.Model):
 
 		# Add code that uses self to retrieve a QuerySet composed of regions, then loops over it
 		# building a list of region names, before returning a comma-delimited string of names.
-        region_obj = HeritageSite.objects.select_related().values(name = F('country_area__location__region__region_name')).order_by('name').filter(heritage_site_id = self.heritage_site_id)
+        #region_obj = HeritageSite.objects.select_related().values(name = F('country_area__location__region__region_name')).order_by('name').filter(heritage_site_id = self.heritage_site_id)
+        region_obj = self.country_area.values_list('location__region__region_name',flat=True).order_by('location__region__region_name')        
+        #print(region_obj)
         names = []
-        for i in range(len(region_obj)):
-            r = region_obj[i]
-            region = r.get('name')
+        for region in region_obj:
+            #r = region_obj[i]
+            #region = r.get('name')
             if region is None:
                 continue
             if region not in names:
-                names.append(region)
+                names.append(region)		
+        #for i in range(len(region_obj)):
+            #r = region_obj[i]
+            #region = r.get('name')
+            #if region is None:
+                #continue
+            #if region not in names:
+                #names.append(region)
         #print(names)
         return ', '.join(names)
 
@@ -171,16 +180,25 @@ class HeritageSite(models.Model):
 		# Add code that uses self to retrieve a QuerySet, then loops over it building a list of
 		# sub region names, before returning a comma-delimited string of names using the string
 		# join method.
-        sub_region_obj = HeritageSite.objects.select_related().values(name = F('country_area__location__sub_region__sub_region_name')).order_by('name').filter(heritage_site_id = self.heritage_site_id)
-
+        #sub_region_obj = HeritageSite.objects.select_related().values(name = F('country_area__location__sub_region__sub_region_name')).order_by('name').filter(heritage_site_id = self.heritage_site_id)
+        sub_region_obj = self.country_area.values_list('location__sub_region__sub_region_name',flat=True).order_by('location__sub_region__sub_region_name')        
+        #print(region_obj)
         names = []
-        for i in range(len(sub_region_obj)):
-            r = sub_region_obj[i]
-            sub_region = r.get('name')
-            if sub_region is None:
+        for region in sub_region_obj:
+            #r = region_obj[i]
+            #region = r.get('name')
+            if region is None:
                 continue
-            if sub_region not in names:
-                names.append(sub_region)
+            if region not in names:
+                names.append(region)
+        #names = []
+        #for i in range(len(sub_region_obj)):
+        #    r = sub_region_obj[i]
+        #    sub_region = r.get('name')
+        #    if sub_region is None:
+        #        continue
+        #    if sub_region not in names:
+        #        names.append(sub_region)
         #print(names)
         return ', '.join(names)
     @property
@@ -197,17 +215,26 @@ class HeritageSite(models.Model):
 		# Add code that uses self to retrieve a QuerySet, then loops over it building a list of
 		# intermediate region names, before returning a comma-delimited string of names using the
 		# string join method.
-        intermediate_region_obj = HeritageSite.objects.select_related().values(name = F('country_area__location__intermediate_region__intermediate_region_name')).order_by('name').filter(heritage_site_id = self.heritage_site_id)
-
-
+        #intermediate_region_obj = HeritageSite.objects.select_related().values(name = F('country_area__location__intermediate_region__intermediate_region_name')).order_by('name').filter(heritage_site_id = self.heritage_site_id)
+        intermediate_region_obj = self.country_area.values_list('location__intermediate_region__intermediate_region_name',flat=True).order_by('location__intermediate_region__intermediate_region_name')        
+        #print(region_obj)
         names = []
-        for i in range(len(intermediate_region_obj)):
-            r = intermediate_region_obj[i]
-            intermediate_region = r.get('name')
-            if intermediate_region is None:
+        for region in intermediate_region_obj:
+            #r = region_obj[i]
+            #region = r.get('name')
+            if region is None:
                 continue
-            if intermediate_region not in names:
-                names.append(intermediate_region)
+            if region not in names:
+                names.append(region)
+
+        #names = []
+        #for i in range(len(intermediate_region_obj)):
+        #    r = intermediate_region_obj[i]
+        #    intermediate_region = r.get('name')
+        #    if intermediate_region is None:
+        #        continue
+        #    if intermediate_region not in names:
+        #        names.append(intermediate_region)
         #print(names)
         return ', '.join(names)
 
