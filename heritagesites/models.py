@@ -14,10 +14,10 @@ from django.db.models import F
 class CountryArea(models.Model):
     country_area_id = models.AutoField(primary_key=True)
     country_area_name = models.CharField(unique=True, max_length=100)
-    location = models.ForeignKey('Location', models.DO_NOTHING, blank=True, null=True)
+    location = models.ForeignKey('Location', on_delete=models.PROTECT, blank=True, null=True)
     m49_code = models.SmallIntegerField()
     iso_alpha3_code = models.CharField(max_length=3)
-    dev_status = models.ForeignKey('DevStatus', models.DO_NOTHING, blank=True, null=True)
+    dev_status = models.ForeignKey('DevStatus', on_delete=models.PROTECT, blank=True, null=True)
 
     class Meta:
         managed = False
@@ -82,7 +82,7 @@ class HeritageSite(models.Model):
     longitude = models.DecimalField(max_digits=11, decimal_places=8, blank=True, null=True)
     latitude = models.DecimalField(max_digits=10, decimal_places=8, blank=True, null=True)
     area_hectares = models.FloatField(blank=True, null=True)
-    heritage_site_category = models.ForeignKey('HeritageSiteCategory', models.DO_NOTHING)
+    heritage_site_category = models.ForeignKey('HeritageSiteCategory', on_delete=models.PROTECT)
     transboundary = models.IntegerField()
 
     # Intermediate model (country_area -> heritage_site_jurisdiction <- heritage_site)
@@ -145,7 +145,7 @@ class HeritageSite(models.Model):
 		# Add code that uses self to retrieve a QuerySet composed of regions, then loops over it
 		# building a list of region names, before returning a comma-delimited string of names.
         #region_obj = HeritageSite.objects.select_related().values(name = F('country_area__location__region__region_name')).order_by('name').filter(heritage_site_id = self.heritage_site_id)
-        region_obj = self.country_area.values_list('location__region__region_name',flat=True).order_by('location__region__region_name')        
+        region_obj = self.country_area.values_list('location__region__region_name',flat=True).order_by('location__region__region_name')
         #print(region_obj)
         names = []
         for region in region_obj:
@@ -154,7 +154,7 @@ class HeritageSite(models.Model):
             if region is None:
                 continue
             if region not in names:
-                names.append(region)		
+                names.append(region)
         #for i in range(len(region_obj)):
             #r = region_obj[i]
             #region = r.get('name')
@@ -181,7 +181,7 @@ class HeritageSite(models.Model):
 		# sub region names, before returning a comma-delimited string of names using the string
 		# join method.
         #sub_region_obj = HeritageSite.objects.select_related().values(name = F('country_area__location__sub_region__sub_region_name')).order_by('name').filter(heritage_site_id = self.heritage_site_id)
-        sub_region_obj = self.country_area.values_list('location__sub_region__sub_region_name',flat=True).order_by('location__sub_region__sub_region_name')        
+        sub_region_obj = self.country_area.values_list('location__sub_region__sub_region_name',flat=True).order_by('location__sub_region__sub_region_name')
         #print(region_obj)
         names = []
         for region in sub_region_obj:
@@ -216,7 +216,7 @@ class HeritageSite(models.Model):
 		# intermediate region names, before returning a comma-delimited string of names using the
 		# string join method.
         #intermediate_region_obj = HeritageSite.objects.select_related().values(name = F('country_area__location__intermediate_region__intermediate_region_name')).order_by('name').filter(heritage_site_id = self.heritage_site_id)
-        intermediate_region_obj = self.country_area.values_list('location__intermediate_region__intermediate_region_name',flat=True).order_by('location__intermediate_region__intermediate_region_name')        
+        intermediate_region_obj = self.country_area.values_list('location__intermediate_region__intermediate_region_name',flat=True).order_by('location__intermediate_region__intermediate_region_name')
         #print(region_obj)
         names = []
         for region in intermediate_region_obj:
@@ -286,8 +286,8 @@ class HeritageSiteCategory(models.Model):
 
 class HeritageSiteJurisdiction(models.Model):
     heritage_site_jurisdiction_id = models.AutoField(primary_key=True)
-    heritage_site = models.ForeignKey(HeritageSite, models.DO_NOTHING)
-    country_area = models.ForeignKey(CountryArea, models.DO_NOTHING)
+    heritage_site = models.ForeignKey(HeritageSite, on_delete=models.CASCADE)
+    country_area = models.ForeignKey(CountryArea, on_delete=models.CASCADE)
 
     class Meta:
         managed = False
@@ -311,7 +311,7 @@ class HeritageSiteJurisdiction(models.Model):
 class IntermediateRegion(models.Model):
     intermediate_region_id = models.AutoField(primary_key=True)
     intermediate_region_name = models.CharField(unique=True, max_length=100)
-    sub_region = models.ForeignKey('SubRegion', models.DO_NOTHING)
+    sub_region = models.ForeignKey('SubRegion', on_delete=models.PROTECT)
 
     class Meta:
         managed = False
@@ -339,7 +339,7 @@ class IntermediateRegion(models.Model):
 class Region(models.Model):
     region_id = models.AutoField(primary_key=True)
     region_name = models.CharField(unique=True, max_length=100)
-    planet = models.ForeignKey('Planet', models.DO_NOTHING, blank=True, null=True)
+    planet = models.ForeignKey('Planet', on_delete=models.PROTECT, blank=True, null=True)
 
     class Meta:
         managed = False
@@ -366,7 +366,7 @@ class Region(models.Model):
 class SubRegion(models.Model):
     sub_region_id = models.AutoField(primary_key=True)
     sub_region_name = models.CharField(unique=True, max_length=100)
-    region = models.ForeignKey(Region, models.DO_NOTHING)
+    region = models.ForeignKey(Region, on_delete=models.PROTECT)
 
     class Meta:
         managed = False
@@ -406,10 +406,10 @@ class Planet(models.Model):
 
 class Location(models.Model):
     location_id = models.AutoField(primary_key=True)
-    planet = models.ForeignKey('Planet', models.DO_NOTHING, blank=True, null=True)
-    region = models.ForeignKey('Region', models.DO_NOTHING, blank=True, null=True)
-    sub_region = models.ForeignKey('SubRegion', models.DO_NOTHING, blank=True, null=True)
-    intermediate_region = models.ForeignKey('IntermediateRegion', models.DO_NOTHING, blank=True, null=True)
+    planet = models.ForeignKey('Planet', on_delete=models.PROTECT, blank=True, null=True)
+    region = models.ForeignKey('Region', on_delete=models.PROTECT, blank=True, null=True)
+    sub_region = models.ForeignKey('SubRegion', on_delete=models.PROTECT, blank=True, null=True)
+    intermediate_region = models.ForeignKey('IntermediateRegion', on_delete=models.PROTECT, blank=True, null=True)
 
 
     class Meta:

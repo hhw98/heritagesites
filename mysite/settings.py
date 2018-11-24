@@ -43,11 +43,23 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+	'django.contrib.sites',
+	'api.apps.ApiConfig',
     'heritagesites.apps.HeritagesitesConfig',
+	'rest_framework_swagger',
 	'social_django', 
 	'test_without_migrations',
+	#third party
+	'corsheaders',
 	'crispy_forms',
-	'django_filters'
+	'django_filters',
+	'rest_framework',
+	'rest_framework.authtoken',
+	'rest_auth',
+	'allauth',
+	'allauth.account',
+	'allauth.socialaccount',
+	'rest_auth.registration',
 ]
 # django-crispy-forms
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
@@ -55,6 +67,8 @@ CRISPY_TEMPLATE_PACK = 'bootstrap4'
 TEST_RUNNER = 'heritagesites.utils.UnManagedModelTestRunner'
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -170,3 +184,28 @@ LOGIN_URL = '/auth/login/google-oauth2/'
 
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
+
+# Use Django's standard `django.contrib.auth` permissions, or allow read-only access for
+# unauthenticated users.
+# Default Auth: Basic (retired in favor of TokenAuth)
+# Default Auth: SessionAuth (required by browsable API)
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication'
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+	    'rest_framework.permissions.IsAuthenticatedOrReadOnly'
+        # 'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+        # 'rest_framework.permissions.AllowAny'
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10
+}
+CORS_ORIGIN_WHITELIST = (
+    '127.0.0.1:3000/'
+)
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+SITE_ID = 1
