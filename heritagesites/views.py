@@ -79,7 +79,7 @@ class SiteCreateView(generic.View):
 		form = HeritageSiteForm(request.POST)
 		if form.is_valid():
 			site = form.save(commit=False)
-			site.save()
+			site.save()		
 			for country in form.cleaned_data['country_area']:
 				HeritageSiteJurisdiction.objects.create(heritage_site=site, country_area=country)
 			return redirect(site) # shortcut to object's get_absolute_url()
